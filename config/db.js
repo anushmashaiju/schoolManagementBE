@@ -2,15 +2,16 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/school', {
+    await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     console.log('MongoDB connected');
   } catch (error) {
+
+    throw new Error( "db error")
     console.error('Database connection error:', error);
-    process.exit(1);
+
   }
 };
-
-module.exports = connectDB;
+ export  default connectDB;
