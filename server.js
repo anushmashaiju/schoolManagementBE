@@ -10,11 +10,10 @@ import connectDB from "./config/db.js";
 
 import {
   verifyToken,
-  isAdmin,
-  isStaff,
-  isLibrarian,
 } from "./middleware/authMiddleware.js";
 import userRouter from "./router/auth.js";
+import libraryRouter from "./router/library.js";
+import feeRouter from "./router/fees.js";
 
 const app = express();
 
@@ -23,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/v1", userRouter);
+app.use("/api/v1", userRouter,studentRoutes,libraryRouter,feeRouter);
 
 const PORT = process.env.PORT || 5000;
 
@@ -33,4 +32,7 @@ connectDB()
   })
   .catch((error) => {
     console.log(error);
-  });
+  });
+
+
+

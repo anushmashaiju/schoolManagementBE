@@ -1,23 +1,63 @@
 import LibraryHistory from '../model/LibraryRecord.js';
+import Student from '../model/Student.js';
+
+// Add library history
+export const addLibraryHistory = async (req, res) => {
+    try {
+        const { bookId, bookName, authorName, borrowDate, returnDate, status, student } = req.body;
+
+        // Check if the student exists
+        const studentRecord = await Student.findById(student); 
+        if (!studentRecord) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Create new library history record
+        const newLibraryHistory = new LibraryHistory({
+            bookId,
+            bookName,
+            authorName,
+            borrowDate,
+            returnDate,
+            status,
+            student: studentRecord._id, // Assign student ID
+            studentDetails: { 
+                name: studentRecord.name, 
+                class: studentRecord.class, 
+                admissionNo: studentRecord.admissionNo 
+            }  // Capture student details at the time of record
+        });
+
+        await newLibraryHistory.save();
+        res.status(201).json({ message: 'Library history added successfully', newLibraryHistory });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to add library history', error: error.message });
+    }
+};
 
 // Get library history for a student
 export const getLibraryHistory = async (req, res) => {
     try {
-        const libraryHistory = await LibraryHistory.find({ studentId: req.params.studentId });
-        res.json(libraryHistory);
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
+        const studentId = req.params.studentId;
+        const libraryRecords = await Library.find({ studentId });
+
+        if (!libraryRecords || libraryRecords.length === 0) {
+            return res.status(404).json({ message: 'No library records found for this student.' });
+        }
+
+        return res.status(200).json(libraryRecords);
+    } catch (error) {
+        console.error(error); // Log error for debugging
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
-
-// Add new library history
-export const addLibraryHistory = async (req, res) => {
+// Get all library history
+export const getAllLibraryHistory = async (req, res) => {
     try {
-        const newHistory = new LibraryHistory(req.body);
-        await newHistory.save();
-        res.json(newHistory);
+        const allLibraryHistory = await LibraryHistory.find().populate('student'); // Optionally populate the student details
+        res.json(allLibraryHistory);
     } catch (err) {
-        res.status(400).json({ error: 'Error adding library record' });
+        res.status(500).json({ error: 'Error fetching library history', details: err.message });
     }
 };
 
@@ -25,18 +65,28 @@ export const addLibraryHistory = async (req, res) => {
 export const updateLibraryHistory = async (req, res) => {
     try {
         const updatedHistory = await LibraryHistory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+        if (!updatedHistory) {
+            return res.status(404).json({ error: 'Library record not found' });
+        }
+
         res.json(updatedHistory);
     } catch (err) {
-        res.status(400).json({ error: 'Error updating library record' });
+        res.status(400).json({ error: 'Error updating library record', details: err.message });
     }
 };
 
 // Delete library history
 export const deleteLibraryHistory = async (req, res) => {
     try {
-        await LibraryHistory.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Library record deleted' });
+        const deletedHistory = await LibraryHistory.findByIdAndDelete(req.params.id);
+
+        if (!deletedHistory) {
+            return res.status(404).json({ error: 'Library record not found' });
+        }
+
+        res.json({ message: 'Library record deleted successfully' });
     } catch (err) {
-        res.status(500).json({ error: 'Error deleting record' });
+        res.status(500).json({ error: 'Error deleting record', details: err.message });
     }
 };

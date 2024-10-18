@@ -1,18 +1,28 @@
 import { Router } from 'express';
-import { getLibraryHistory, addLibraryHistory, updateLibraryHistory, deleteLibraryHistory } from '../controllers/libraryController.js';
+import {
+  addLibraryHistory,
+  getLibraryHistory,
+  getAllLibraryHistory,
+  updateLibraryHistory,
+  deleteLibraryHistory
+} from '../controllers/libraryController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
-const router = Router();
+const libraryRouter = Router();
 
-// Route to get library history for a student
-router.get('/:studentId', getLibraryHistory);
+// Route to add a new library history record (protected route)
+libraryRouter.post('/library', verifyToken, addLibraryHistory);
 
-// Route to add new library history record
-router.post('/', addLibraryHistory);
+// Route to get library history for a specific student (public route, can change based on your needs)
+libraryRouter.get('/library/student/:studentId',verifyToken, getLibraryHistory);
 
-// Route to update library history record
-router.put('/:id', updateLibraryHistory);
+// Route to get all library history (admin route, requires auth)
+libraryRouter.get('/library/all',verifyToken,  getAllLibraryHistory);
 
-// Route to delete library history record
-router.delete('/:id', deleteLibraryHistory);
+// Route to update a library history record (protected route)
+libraryRouter.put('/library/:id',verifyToken,  updateLibraryHistory);
 
-export default router;
+// Route to delete a library history record (protected route)
+libraryRouter.delete('/library/:id', verifyToken, deleteLibraryHistory);
+
+export default libraryRouter;

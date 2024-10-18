@@ -1,18 +1,28 @@
 import { Router } from 'express';
-import { getFeesHistory, addFeesHistory, updateFeesHistory, deleteFeesHistory } from '../controllers/feesController.js';
+import {
+    getFeesHistory,
+    addFeesHistory,
+    updateFeesHistory,
+    deleteFeesHistory,
+    getAllFeesHistory,
+} from '../controllers/feesController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
-const router = Router();
+const feeRouter = Router();
 
 // Route to get fees history for a student
-router.get('/:studentId', getFeesHistory);
+feeRouter.get('/fees/student/:studentId',verifyToken, getFeesHistory); // Changed this line
+
+// Get all students' fees history
+feeRouter.get('/fees/all',verifyToken, getAllFeesHistory); // Changed this line
 
 // Route to add new fees record
-router.post('/', addFeesHistory);
+feeRouter.post('/fees',verifyToken, addFeesHistory);
 
 // Route to update fees record
-router.put('/:id', updateFeesHistory);
+feeRouter.put('/fees/:id',verifyToken, updateFeesHistory);
 
 // Route to delete fees record
-router.delete('/:id', deleteFeesHistory);
+feeRouter.delete('/fees/:id',verifyToken, deleteFeesHistory);
 
-export default router;
+export default feeRouter;

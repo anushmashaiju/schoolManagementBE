@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ["admin", "staff", "librarian"], default:"admin"},
+  role: { type: String, enum: ["admin", "staff", "librarian"], default: "admin" },
 });
 
 userSchema.pre("save", async function (next) {
@@ -26,7 +26,6 @@ userSchema.methods.generateAcessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
-      username: this.username,
       email: this.email,
       role: this.role,
     },
